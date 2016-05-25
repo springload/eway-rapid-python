@@ -35,7 +35,7 @@ Rapid API documentation: https://eway.io/api-v3
 ```python
 from eway.rapid.client import RestClient
 from eway.rapid.endpoint import SandboxEndpoint
-from eway.rapid.model import Payment, RequestMethod, TranspactionType
+from eway.rapid.model import Payment, RequestMethod, TransactionType
 from eway.rapid.payment_method.transparent_redirect import TransparentRedirect, CreateAccessCodeRequest
 
 payment_method = TransparentRedirect(RestClient('api-key', 'api-password', SandboxEndpoint()))
