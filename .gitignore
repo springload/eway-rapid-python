@@ -1,0 +1,4 @@
+.DS_Store
+.hypothesis
+eway_rapid_python.egg-info
+*.pyc

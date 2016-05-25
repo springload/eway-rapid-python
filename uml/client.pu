@@ -1,0 +1,44 @@
+@startuml
+!ifndef client_pu
+!define client_pu
+
+!include skin.pu
+!include exception.pu
+!include endpoint.pu
+
+
+package eway {
+    package rapid {
+        namespace client {
+            interface Client {
+                # _api_key      : str
+                # _api_password : str
+                # _endpoint     : endpoint.Endpoint
+                # _logger       : logging.Logger
+
+                + __init__(self, api_key, api_password, endpoint, logger=None)
+
+                + transparent_redirect_create_access_code(CreateAccessCodeRequest) -> AccessCodeResponse
+                + transparent_redirect_get_transaction_info(access_code) -> TransactionInfo
+
+                # _validate_endpoint(.endpoint.Endpoint)
+                # _validate_credentials(api_key, api_password)
+                
+            }
+
+            Client o-- endpoint.Endpoint
+            Client -- exception.EwayError
+
+            class RestClient {
+                + access_code(json_string) -> str
+                + access_code_info(access_code) -> str
+                # _validate_response(requests.Response) -> str
+            }
+            hide RestClient members
+            RestClient --> Client
+        }
+    }
+}
+
+!endif
+@enduml

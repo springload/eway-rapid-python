@@ -1,0 +1,9 @@
+@startuml
+!ifndef eway_pu
+!define eway_pu
+
+!include skin.pu
+!include rapid.pu
+
+!endif
+@enduml

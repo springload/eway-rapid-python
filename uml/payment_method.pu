@@ -1,0 +1,127 @@
+@startuml
+!ifndef payment_method_pu
+!define payment_method_pu
+
+!include skin.pu
+!include client.pu
+!include model.pu
+
+package eway {
+    package rapid {
+        namespace payment_method {
+
+            interface Method {
+                # _client : .client.Client
+
+                + __init__(.client.Client)
+                # trigger_errors(codes)
+            }
+            Method o-- client.Client
+
+            namespace transparent_redirect {
+                class TransparentRedirect {
+                    + create_access_code(.request.CreateAccessCodeRequest) -> .response.AccessCodeResponse
+                    + request_transaction_result(access_code) -> .response.TransactionInfo
+                }
+                hide TransparentRedirect attributes
+                TransparentRedirect -up-> payment_method.Method
+
+                namespace request {
+                    class CreateAccessCodeRequest {
+                        + Method          : model.RequestMethod
+                        + TransactionType : model.TransactionType
+                        + Payment         : model.Payment
+                        + Customer        : model.Customer
+                        + ShippingAddress : model.ShippingAddress
+
+                        + Items           : [model.Item]
+                        + Options         : [model.Option]
+
+                        + RedirectUrl     : str
+                        + CustomerIP      : str
+                        + DeviceID        : str
+                        + CheckoutPayment : bool
+                        + CheckoutUrl     : str
+                        + PartnerID       : str
+                    }
+                    hide CreateAccessCodeRequest methods
+                    CreateAccessCodeRequest -- payment_method.transparent_redirect.TransparentRedirect
+                    CreateAccessCodeRequest *-- model.Customer
+                    CreateAccessCodeRequest *-- model.ShippingAddress
+                    CreateAccessCodeRequest *-- model.Payment
+                    CreateAccessCodeRequest o-- model.Item
+                    CreateAccessCodeRequest o-- model.Option
+                    CreateAccessCodeRequest *-- model.RequestMethod
+                    CreateAccessCodeRequest *-- model.TransactionType
+                }
+
+                namespace response {
+                    class AccessCodeResponse {
+                        + AccessCode          : str
+                        + FormActionURL       : str
+                        + Errors              : str
+                        + CompleteCheckoutURL : str
+                        + Customer            : model.Customer
+                        + Payment             : model.Payment
+                    }
+                    hide AccessCodeResponse methods
+                    AccessCodeResponse -- payment_method.transparent_redirect.TransparentRedirect
+                    AccessCodeResponse *-- model.Customer
+                    AccessCodeResponse *-- model.Payment
+
+                    class TransactionInfo {
+                        + AccessCode        : str(512)
+                        + AuthorisationCode : str(6)
+                        + ResponseCode      : str(2)
+                        + ResponseMessage   : str(512)
+                        + InvoiceNumber     : str(64)
+                        + InvoiceReference  : str(64)
+                        + TotalAmount       : int
+                        + TransactionID     : int
+                        + TransactionStatus : bool
+                        + TokenCustomerID   : int
+                        + BeagleScore       : string
+                        + Errors            : string
+
+                        + Options            : [.model.Option]
+                        + Verification       : .model.Verification
+                        + BeagleVerification : .model.BeagleVerification
+                    }
+                    hide TransactionInfo methods
+                    TransactionInfo -- payment_method.transparent_redirect.TransparentRedirect
+                    TransactionInfo *-- model.Option
+                    TransactionInfo *-- model.Verification
+                    TransactionInfo *-- model.BeagleVerification
+                }
+            }
+
+
+            class DirectConnection {
+            }
+            hide DirectConnection members
+            DirectConnection -down-> Method
+
+
+            class ResponsiveShared {
+            }
+            hide ResponsiveShared members
+            ResponsiveShared -right-> Method
+
+
+            class Wallet {
+            }
+            hide Wallet members
+            Wallet --> Method
+
+
+            class Authorisation {
+            }
+            hide Authorisation members
+            Authorisation --> Method
+
+        }
+    }
+}
+
+!endif
+@enduml

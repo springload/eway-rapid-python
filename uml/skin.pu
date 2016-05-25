@@ -1,0 +1,9 @@
+@startuml
+!ifndef skin_pu
+!define skin_pu
+
+skinparam defaultFontName Hack
+skinparam shadowing false
+
+!endif
+@enduml

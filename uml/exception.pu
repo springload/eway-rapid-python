@@ -1,0 +1,53 @@
+@startuml
+!ifndef exception_pu
+!define exception_pu
+
+!include skin.pu
+
+package eway {
+    package rapid {
+        namespace exception {
+            class EwayError {
+                - _code    : str
+                - _message : str
+
+                + __init__(code, message)
+
+                __ classmethods __
+                from_code(cls, code, *args, **kwargs) -> EwayError|None
+
+                __ staticmethods __
+                lookup_error_by_code(code, *args, **kwargs) -> EwayError|None
+            }
+
+            class ResponseError {
+            }
+            hide ResponseError members
+
+            class ValidationError {
+            }
+            hide ValidationError members
+
+            class SystemError {
+            }
+            hide SystemError members
+
+            class FraudError {
+            }
+            hide FraudError members
+
+            class TransactionError {
+            }
+            hide TransactionError members
+
+            ResponseError --> EwayError
+            ValidationError --> EwayError
+            SystemError -> EwayError
+            FraudError -> EwayError
+            TransactionError --> EwayError
+        }
+    }
+}
+
+!endif
+@enduml

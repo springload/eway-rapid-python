@@ -1,0 +1,35 @@
+@startuml
+!ifndef endpoint_pu
+!define endpoint_pu
+
+!include skin.pu
+
+package eway {
+    package rapid {
+        namespace endpoint {
+
+            interface Endpoint {
+                + get_url()    -> str
+                + is_sandbox() -> bool
+            }
+            hide Endpoint attributes
+
+
+            class SandboxEndpoint {
+            }
+            hide SandboxEndpoint members
+
+
+            class ProductionEndpoint {
+            }
+            hide ProductionEndpoint members
+
+
+            SandboxEndpoint --> Endpoint
+            ProductionEndpoint --> Endpoint
+        }
+    }
+}
+
+!endif
+@enduml

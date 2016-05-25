@@ -1,0 +1,119 @@
+@startuml
+!ifndef model_pu
+!define model_pu
+
+!include skin.pu
+
+package eway {
+    package rapid {
+        namespace model {
+            enum RequestMethod {
+                ProcessPayment
+                Authorise
+                TokenPayment
+                CreateTokenCustomer
+                UpdateTokenCustomer
+            }
+            hide RequestMethod methods
+
+            enum TransactionType {
+                Purchase
+                MOTO
+                Recurring
+            }
+            hide TransactionType methods
+
+            class Customer {
+                + CardExpiryMonth : int
+                + CardExpiryYear  : int
+                + CardIssueNumber : str
+                + CardName        : str
+                + CardNumber      : str
+                + CardStartMonth  : str
+                + CardStartYear   : str
+                + City            : str
+                + Comments        : str
+                + CompanyName     : str
+                + Country         : str
+                + Email           : str
+                + Fax             : str
+                + FirstName       : str
+                + IsActive        : str
+                + JobDescription  : str
+                + LastName        : str
+                + Mobile          : str
+                + Phone           : str
+                + PostalCode      : str
+                + Reference       : str
+                + State           : str
+                + Street1         : str
+                + Street2         : str
+                + Title           : str
+                + TokenCustomerID : str
+                + Url             : str
+            }
+            hide Customer methods
+
+
+            class Payment {
+                + TotalAmount        : int
+                + CurrencyCode       : str
+                + InvoiceDescription : str
+                + InvoiceNumber      : str
+                + InvoiceReference   : str
+            }
+            hide Payment methods
+
+
+            class ShippingAddress {
+                + FirstName      : str
+                + LastName       : str
+                + Street1        : str
+                + Street2        : str
+                + City           : str
+                + State          : str
+                + Country        : str
+                + PostalCode     : str
+                + Email          : str
+                + Phone          : str
+                + Fax            : str
+                + ShippingMethod : str
+            }
+            hide ShippingAddress methods
+
+
+            class Item {
+                + SKU         : str
+                + Description : str
+                + Quantity    : int
+                + UnitCost    : int
+                + Tax         : int
+                + Total       : int
+            }
+            hide Item methods
+
+            class Option {
+                + Value : str
+            }
+            hide Option methods
+
+            class BeagleVerification {
+                + Email : str
+                + Phone : str
+            }
+            hide BeagleVerification methods
+
+            class Verification {
+                + CVN     : str
+                + Address : str
+                + Email   : str
+                + Mobile  : str
+                + Phone   : str
+            }
+            hide Verification methods
+        }
+    }
+}
+
+@endif
+@enduml

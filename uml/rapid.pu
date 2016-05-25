@@ -1,0 +1,12 @@
+@startuml
+!ifndef rapid_pu
+!define rapid_pu
+
+!include skin.pu
+
+!include client.pu
+!include exception.pu
+!include payment_method.pu
+
+!endif
+@enduml
