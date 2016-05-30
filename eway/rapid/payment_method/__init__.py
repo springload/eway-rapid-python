@@ -4,7 +4,6 @@ from eway.rapid.exception import EwayError
 class Method(object):
     _client = None
 
-
     def __init__(self, client):
         '''
         Initializes the object
@@ -14,7 +13,6 @@ class Method(object):
         '''
 
         self._client = client
-
 
     def trigger_errors(self, codes, **kwargs):
         for code in codes:

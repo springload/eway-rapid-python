@@ -7,8 +7,6 @@ from .endpoint import Endpoint
 from .exception import ResponseError
 
 
-
-
 class Client(object):
     '''
     Client for eWAY Rapid API v3
@@ -21,7 +19,6 @@ class Client(object):
     _endpoint = None
 
     _logger = None
-
 
     def __init__(self, api_key, api_password, endpoint, logger=None):
         '''
@@ -46,17 +43,15 @@ class Client(object):
         self._validate_endpoint(endpoint)
         self._endpoint = endpoint
 
-
     def _validate_credentials(self, api_key, api_password):
         if not len(api_key) or not len(api_password):
             self._logger.error('API key and password are invalid')
-            raise ResponseError('S9991') # Rapid API key or password not set
-
+            raise ResponseError('S9991')  # Rapid API key or password not set
 
     def _validate_endpoint(self, endpoint):
         if not len(endpoint.get_url()):
             self._logger.error('Endpoint returns empty URL')
-            raise ResponseError('S9990') # Rapid endpoint not set or invalid
+            raise ResponseError('S9990')  # Rapid endpoint not set or invalid
 
         # TODO: do we have any more appropriate pong methods on the API side?
         # try:
@@ -68,10 +63,8 @@ class Client(object):
     def transparent_redirect_create_access_code(self, request):
         raise TypeError('Method transparent_redirect_create_access_code has not been implemented')
 
-
     def transparent_redirect_get_transaction_info(self, access_code):
         raise TypeError('Method transparent_redirect_get_transaction_info has not been implemented')
-
 
 
 class RestClient(Client):
@@ -92,8 +85,6 @@ class RestClient(Client):
 
         return self._validate_response(response)
 
-
-
     def transparent_redirect_get_transaction_info(self, access_code):
         '''
         TransparentRedirect STEP 3
@@ -111,24 +102,22 @@ class RestClient(Client):
 
         return self._validate_response(response)
 
-
-
     def _validate_response(self, response):
         txt = response.text.strip()
 
         if response.status_code == 401:
-            raise ResponseError('S9993') # Authentication error
+            raise ResponseError('S9993')  # Authentication error
 
         elif response.status_code == 404:
-            raise ResponseError('S9990') # Rapid endpoint not set or invalid
+            raise ResponseError('S9990')  # Rapid endpoint not set or invalid
 
         elif response.status_code >= 500:
-            raise ResponseError('S9996') # Rapid gateway server error
+            raise ResponseError('S9996')  # Rapid gateway server error
 
         elif len(txt) == 0:
-            raise ResponseError('S9902') # Empty response
+            raise ResponseError('S9902')  # Empty response
 
         elif not txt.startswith(u'{') or not txt.strip().endswith(u'}'):
-            raise ResponseError('S9901') # Response is not JSON
+            raise ResponseError('S9901')  # Response is not JSON
 
         return txt

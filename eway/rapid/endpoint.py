@@ -15,7 +15,6 @@ class Endpoint(object):
         return False
 
 
-
 class SandboxEndpoint(Endpoint):
     '''
     eWAY Rapid API sandbox endpoint implementation
@@ -30,7 +29,6 @@ class SandboxEndpoint(Endpoint):
         return True
 
 
-
 class ProductionEndpoint(Endpoint):
     '''
     eWAY Rapid API production endpoint implementation
@@ -38,5 +36,5 @@ class ProductionEndpoint(Endpoint):
     Attributes:
         _url    URL address of the Rapid API endpoind
     '''
-    
+
     _url = r'https://api.ewaypayments.com/'

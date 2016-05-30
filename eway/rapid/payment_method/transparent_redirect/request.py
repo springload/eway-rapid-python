@@ -1,5 +1,6 @@
 from eway.rapid.model import Payment, RequestMethod, StructMixin, TransactionType
 
+
 class CreateAccessCodeRequest(StructMixin):
     '''
     Request for the Step1: CREATE A NEW ACCESS CODE
@@ -38,7 +39,6 @@ class CreateAccessCodeRequest(StructMixin):
     CheckoutPayment = None
     CheckoutUrl = None
 
-
     def __init__(self, payment, method, transaction_type, redirect_url, **kwargs):
         '''
         Makes a CreateAccessCodeRequest and sends it to eWAY
@@ -52,21 +52,17 @@ class CreateAccessCodeRequest(StructMixin):
         '''
         super(CreateAccessCodeRequest, self).__init__(**kwargs)
 
-
         if not isinstance(method, RequestMethod):
             raise TypeError('method must be an instance of .model.RequestMethod')
 
-
         if not isinstance(transaction_type, TransactionType):
             raise TypeError('transaction_type must be an instance of .model.TransactionType')
-
 
         if not payment:
             payment = Payment()
 
         elif not isinstance(payment, Payment):
             raise TypeError('payment must be an instance of .model.Payment')
-
 
         self.Method = method
         self.TransactionType = transaction_type

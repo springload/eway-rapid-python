@@ -25,13 +25,12 @@ class StructToJsonMixin(object):
         else:
             circle = kwargs['circle']
 
-
         if self in circle:
             try:
                 RecursionError
                 raise RecursionError('Circular reference detected')
             except NameError:
-                raise RuntimeError('Circular reference detected') # python < 3.5
+                raise RuntimeError('Circular reference detected')  # python < 3.5
 
         circle.append(self)
 
@@ -92,10 +91,8 @@ class StructFromJsonMixin(object):
         return instance
 
 
-
 class StructMixin(StructInitMixin, StructFromJsonMixin, StructToJsonMixin):
     pass
-
 
 
 class RequestMethod(StructToJsonMixin, StructFromJsonMixin, Enum):
@@ -139,7 +136,6 @@ class RequestMethod(StructToJsonMixin, StructFromJsonMixin, Enum):
             raise error
 
 
-
 class TransactionType(StructToJsonMixin, StructFromJsonMixin, Enum):
     Purchase = 'Purchase'
     MOTO = 'MOTO'
@@ -173,7 +169,6 @@ class TransactionType(StructToJsonMixin, StructFromJsonMixin, Enum):
             raise error
 
 
-
 class Payment(StructMixin):
     '''
     Details of the payment being processed
@@ -198,7 +193,6 @@ class Payment(StructMixin):
     InvoiceNumber = None
     InvoiceReference = None
 
-
     def __init__(self, total_amount=None, currency=None, **kwargs):
         super(Payment, self).__init__(**kwargs)
 
@@ -210,7 +204,6 @@ class Payment(StructMixin):
 
         if currency and not self.CurrencyCode:
             self.CurrencyCode = currency
-
 
 
 class Customer(StructMixin):
@@ -276,7 +269,6 @@ class Customer(StructMixin):
     Url = None
 
 
-
 class Item(StructMixin):
     '''
     The Items section is optional.
@@ -298,7 +290,6 @@ class Item(StructMixin):
     UnitCost = None
     Tax = None
     Total = None
-
 
 
 class ShippingAddress(StructMixin):
@@ -337,7 +328,6 @@ class ShippingAddress(StructMixin):
     ShippingMethod = None
 
 
-
 class Option(StructMixin):
     '''
     This field is not displayed to the customer but is returned in the result.
@@ -351,7 +341,6 @@ class Option(StructMixin):
     Value = None
 
 
-
 class BeagleVerification(StructMixin):
     '''
     Beagle Verification identification checks that may have been performed
@@ -363,7 +352,6 @@ class BeagleVerification(StructMixin):
 
     Email = None
     Phone = None
-
 
 
 class Verification(StructMixin):

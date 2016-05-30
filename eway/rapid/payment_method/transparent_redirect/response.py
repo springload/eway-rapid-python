@@ -29,7 +29,6 @@ class AccessCodeResponse(StructMixin):
         return super(AccessCodeResponse, cls).from_json(json_string, ignore_unknown, **_kwargs)
 
 
-
 class TransactionInfo(StructMixin):
     '''
     Response for the Step3: REQUEST THE RESULTS
@@ -70,7 +69,6 @@ class TransactionInfo(StructMixin):
     Options = None
     Verification = None
     BeagleVerification = None
-
 
     @classmethod
     def from_json(cls, json_string, ignore_unknown=False, **kwargs):

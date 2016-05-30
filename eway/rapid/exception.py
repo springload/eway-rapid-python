@@ -28,7 +28,6 @@ class EwayError(Exception):
         self._code = code
         self._message = '{} / {}'.format(code, message).encode('utf-8')
 
-
     def __bytes__(self):
         return self._message
 
@@ -44,7 +43,6 @@ class EwayError(Exception):
     def __repr__(self):
         return self.__unicode__()
 
-
     @classmethod
     def from_code(cls, code, *args, **kwargs):
         '''
@@ -55,7 +53,6 @@ class EwayError(Exception):
             return cls(code, *args, **kwargs)
 
         return None
-
 
     @staticmethod
     def lookup_error_by_code(code, *args, **kwargs):
@@ -78,7 +75,6 @@ class EwayError(Exception):
         system_error = SystemError.from_code(code)
         if system_error:
             return system_error
-
 
 
 class ResponseError(EwayError):
@@ -216,13 +212,11 @@ class ValidationError(EwayError):
         "V6171": "Invalid TransactionSearch, Invoice Number not found"
     }
 
-
     def __init__(self, code, *args, **kwargs):
         if code not in ValidationError.INDEX.keys():
             raise ValueError('Invalid error code: {}'.format(code))
 
         super(ValidationError, self).__init__(code, ValidationError.INDEX[code], *args, **kwargs)
-
 
 
 class SystemError(EwayError):
@@ -297,7 +291,6 @@ class FraudError(EwayError):
         super(FraudError, self).__init__(code, FraudError.INDEX[code], *args, **kwargs)
 
 
-
 class TransactionError(EwayError):
     INDEX = {
         "A2000": "Transaction Approved Successful*",
@@ -367,7 +360,6 @@ class TransactionError(EwayError):
         "D4499": "Invalid Transaction for Auth/Void Failed",
         "D4450": "Visa Checkout Transaction Error Failed"
     }
-
 
     def __init__(self, code, *args, **kwargs):
         if code not in TransactionError.INDEX.keys():
