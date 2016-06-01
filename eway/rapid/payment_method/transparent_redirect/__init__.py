@@ -1,3 +1,7 @@
+'''
+Implementation of a payment method defined by the specification as Transparent Redirect
+'''
+
 from eway.rapid.payment_method import Method
 
 from .request import CreateAccessCodeRequest

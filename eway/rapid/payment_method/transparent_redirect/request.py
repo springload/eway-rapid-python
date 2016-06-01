@@ -1,3 +1,8 @@
+'''
+The module contains classes representing requests to be sent to Rapid API during creation of a transaction
+using TransparentRedirect payment method
+'''
+
 from eway.rapid.model import Payment, RequestMethod, StructMixin, TransactionType
 
 

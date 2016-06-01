@@ -1,10 +1,21 @@
+'''
+The module contains classes representing possible endpoints implementing Rapid API
+Two of them obviously are Production and Sandbox endpoints provided by eWAY. However,
+it's possible to have here your own endpoing relating to a black-box exposing API and
+participating in integration tests, or even some middleware keeping credentials and
+any other sensible details of communicating with eWAY.
+'''
+
+
 class Endpoint(object):
     '''
-    Abstract
+    Abstract class
 
     eWAY Rapid API endpoint interface object.
     Exposes interface and should be inherited by all endpoint implementations.
     '''
+
+    _url = None
 
     def get_url(self):
         'Returns URL address of the Rapid API endpoind'

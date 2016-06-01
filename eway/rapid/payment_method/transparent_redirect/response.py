@@ -1,3 +1,8 @@
+'''
+The module contains classes representing responses of the Rapid API during creation of a transaction
+using TransparentRedirect payment method
+'''
+
 from eway.rapid.model import Customer, Option, Payment, StructMixin, Verification, BeagleVerification
 
 

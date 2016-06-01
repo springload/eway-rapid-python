@@ -1,12 +1,28 @@
+'''
+The module contains model of the library. It is classes reused by different payment methods
+and representing data payload to exchange it with eWAY.
+'''
+
+from enum import Enum
+
 import inspect
 import json
 import six
 
-from enum import Enum
-
 
 class StructInitMixin(object):
+    '''
+    Mixin implements a constructor initialising an object attributes from key-value pairs
+    '''
+
     def __init__(self, ignore_unknown=False, **kwargs):
+        '''
+        Initialize the object with dinamic list of key-value pairs
+
+        Arguments:
+            ignore_unknown : bool     = False by default. Whether to ignore all the unknown keys instead of raising an exception
+            **kwargs       : {str: ?} = key-value pairs representing attributes of the object and values to be assigned
+        '''
         for key in kwargs:
             if key.startswith('__') and key.endswith('__'):
                 raise AttributeError('Cannot assign meta field of the object: {}.{}'.format(self.__class__.__name__, key))
@@ -20,7 +36,16 @@ class StructInitMixin(object):
 
 
 class StructToJsonMixin(object):
+    '''
+    Mixin implements a method `to_json` which is to be used for serializing objects of the class
+    '''
     def to_json(self, **kwargs):
+        '''
+        Generates a json string from the object
+
+        Arguments:
+            circle : [?] = not to be used explicitly. keeps a list of objects iterated by the function to avoid circular refs
+        '''
         if 'circle' not in kwargs:
             circle = []
         else:
@@ -28,7 +53,6 @@ class StructToJsonMixin(object):
 
         if self in circle:
             try:
-                RecursionError
                 raise RecursionError('Circular reference detected')
             except NameError:
                 raise RuntimeError('Circular reference detected')  # python < 3.5
@@ -40,7 +64,7 @@ class StructToJsonMixin(object):
         for key in self.__dict__:
             if isinstance(self.__dict__[key], StructToJsonMixin):
                 _dict[key] = self.__dict__[key].to_json(circle=circle, noharm=True)
-            elif type(self.__dict__[key]) is list:
+            elif isinstance(self.__dict__[key], list):
                 _dict[key] = []
                 for item in self.__dict__[key]:
                     if isinstance(item, StructToJsonMixin):
@@ -54,8 +78,22 @@ class StructToJsonMixin(object):
 
 
 class StructFromJsonMixin(StructInitMixin):
+    '''
+    Mixin implements a method `from_json` which is to be used for unserializing objects of the class
+    '''
     @classmethod
     def from_json(cls, json_string, ignore_unknown=False, **kwargs):
+        '''
+        Method to unserialize json-encoded objects (recursively)
+
+        Arguments:
+            json_string    : str      = json representation of an object of the class
+            ignore_unknown : bool     = False by default. Whether to ignore all the unknown keys instead of raising an exception
+            **kwargs       : {str: ?} = list of key-value pairs where keys stay for attributes and values contain either:
+                                            - a decoder class also implementing StructFromJsonMixin
+                                            - list with a single decoder class, showing that the argument must be a list of values
+                                            - an instance of a class or a scalar value to be used as a default value
+        '''
         if isinstance(json_string, six.string_types):
             _dict = json.loads(json_string)
         elif isinstance(json_string, dict):
@@ -68,11 +106,11 @@ class StructFromJsonMixin(StructInitMixin):
                 if inspect.isclass(kwargs[key]) and issubclass(kwargs[key], StructFromJsonMixin):
                     _dict[key] = kwargs[key].from_json(_dict[key], ignore_unknown)
 
-                elif type(kwargs[key]) is list \
+                elif isinstance(kwargs[key], list) \
                         and len(kwargs[key]) \
                         and inspect.isclass(kwargs[key][0]) \
                         and issubclass(kwargs[key][0], StructFromJsonMixin) \
-                        and type(_dict[key]) is list:
+                        and isinstance(_dict[key], list):
                     for idx in range(0, len(_dict[key])):
                         _dict[key][idx] = kwargs[key][0].from_json(_dict[key][idx], ignore_unknown)
 
@@ -83,7 +121,7 @@ class StructFromJsonMixin(StructInitMixin):
             if not inspect.isclass(kwargs[key]):
                 _dict[key] = kwargs[key]
 
-            elif type(kwargs[key]) is list and (not len(kwargs[key]) or len(kwargs[key]) > 1 or (len(kwargs[key] == 1) and not inspect.isclass(kwargs[key][0]))):
+            elif isinstance(kwargs[key], list) and (not len(kwargs[key]) or len(kwargs[key]) > 1 or (len(kwargs[key] == 1) and not inspect.isclass(kwargs[key][0]))):
                 _dict[key] = kwargs[key]
 
         instance = cls()
@@ -92,10 +130,19 @@ class StructFromJsonMixin(StructInitMixin):
 
 
 class StructMixin(StructFromJsonMixin, StructToJsonMixin):
+    '''
+    Mixin is a shortcut for StructInitMixin, StructFromJsonMixin and StructToJsonMixin altogether
+    '''
     pass
 
 
 class RequestMethod(StructMixin, Enum):
+    '''
+    Represents a type of a request defined as PaymentMethod in the Rapid API specification, Introduction -> Payment Methods
+
+    NOTE: we cannot use a name PaymentMethod in here, because the name describes rather a kind of an approach we use to perform payment like:
+          one of `TransparentRedirect`, `DirectConnection`, `ResponsiveSharedPage` etc
+    '''
     ProcessPayment = 'ProcessPayment'
     Authorise = 'Authorise'
     TokenPayment = 'TokenPayment'
@@ -137,6 +184,9 @@ class RequestMethod(StructMixin, Enum):
 
 
 class TransactionType(StructMixin, Enum):
+    '''
+    Represents transaction types defined by the Rapid API specification
+    '''
     Purchase = 'Purchase'
     MOTO = 'MOTO'
     Recurring = 'Recurring'

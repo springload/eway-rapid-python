@@ -1,20 +1,37 @@
+'''
+The module contains the base exception (EwayError) which is being used as a parent
+for all the exceptions the library may raise. There is also several exception implementations
+deriving from EwayError and implementing different error categories defined in the
+Rapid API specification in the following way:
+    * ResponseError - SDK Response Codes
+    * ValidationError - Validation Response Codes
+    * TransactionError - Transpaction Response Messages
+    * FraudError - Beagle Fraud Alerts and Beagle Fraud Alerts (Enterprise) Fraud Response Messages
+    * SysError - System Response Codes
+'''
+
+
 class EwayError(Exception):
     '''
     Base exception of the library
     '''
+
+    INDEX = {}
 
     _code = None
     _message = None
     _response_struct = None
     _response_string = None
 
-    def __init__(self, code, message, response=None, *args, **kwargs):
+    def __init__(self, code, message, *args, **kwargs):
         '''
         Initializes the exception
 
         Arguments:
-            code    : str = Rapid API response/error code
-            message : str = appropriate message
+            code            : str = Rapid API response/error code
+            message         : str = appropriate message
+            response_struct : ?   = Object representing a response which caused the error
+            response_string : str = String representing a response which caused the error
         '''
 
         if 'response_struct' in kwargs:
@@ -56,6 +73,15 @@ class EwayError(Exception):
 
     @staticmethod
     def lookup_error_by_code(code, *args, **kwargs):
+        '''
+        Looks for a particular exception by a code representing the according error
+
+        Arguments:
+            code     : str      = error code defined in the Rapid API specification
+            *args    : [?]      = additional arguments to be passed in an exception constructor
+            **kwargs : {str: ?} = additional arguments to be passed in an exception constructor
+        '''
+
         response_error = ResponseError.from_code(code)
         if response_error:
             return response_error
@@ -72,12 +98,16 @@ class EwayError(Exception):
         if fraud_error:
             return fraud_error
 
-        system_error = SystemError.from_code(code)
+        system_error = SysError.from_code(code)
         if system_error:
             return system_error
 
 
 class ResponseError(EwayError):
+    '''
+    Represents errors defined in the specification as SDK Response Codes
+    '''
+
     INDEX = {
         'S9990': 'Rapid endpoint not set or invalid',
         'S9901': 'Response is not JSON',
@@ -97,6 +127,10 @@ class ResponseError(EwayError):
 
 
 class ValidationError(EwayError):
+    '''
+    Represents errors defined in the specification as Validation Response Codes
+    '''
+
     INDEX = {
         "V6000": "Validation error",
         "V6001": "Invalid CustomerIP",
@@ -219,7 +253,11 @@ class ValidationError(EwayError):
         super(ValidationError, self).__init__(code, ValidationError.INDEX[code], *args, **kwargs)
 
 
-class SystemError(EwayError):
+class SysError(EwayError):
+    '''
+    Represents errors defined in the specification as System Response Codes
+    '''
+
     INDEX = {
         'S5000': 'System Error',
         'S5011': 'PayPal Connection Error',
@@ -233,13 +271,19 @@ class SystemError(EwayError):
     }
 
     def __init__(self, code, *args, **kwargs):
-        if code not in SystemError.INDEX.keys():
+        if code not in SysError.INDEX.keys():
             raise ValueError('Invalid error code: {}'.format(code))
 
-        super(SystemError, self).__init__(code, SystemError.INDEX[code], *args, **kwargs)
+        super(SysError, self).__init__(code, SysError.INDEX[code], *args, **kwargs)
 
 
 class FraudError(EwayError):
+    '''
+    Represents errors defined in the specification as Beagle Fraud Alerts and Beagle Fraud Alerts (Enterprise) Fraud Response Messages
+
+    WARNING: A customer should not be informed their order has been flagged as possibly fraudulent. A generic failure message should be displayed instead.
+    '''
+
     INDEX = {
         "F7000": "Undefined Fraud Error",
         "F7001": "Challenged Fraud",
@@ -292,6 +336,10 @@ class FraudError(EwayError):
 
 
 class TransactionError(EwayError):
+    '''
+    Represents errors defined in the specification as Transpaction Response Messages
+    '''
+
     INDEX = {
         "A2000": "Transaction Approved Successful*",
         "A2008": "Honour With Identification Successful",
@@ -357,8 +405,7 @@ class TransactionError(EwayError):
         "D4496": "System Error Failed",
         "D4497": "MasterPass Error Failed",
         "D4498": "PayPal Create Transaction Error Failed",
-        "D4499": "Invalid Transaction for Auth/Void Failed",
-        "D4450": "Visa Checkout Transaction Error Failed"
+        "D4499": "Invalid Transaction for Auth/Void Failed"
     }
 
     def __init__(self, code, *args, **kwargs):

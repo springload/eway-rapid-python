@@ -1,15 +1,26 @@
+'''
+The module with classes implementing different protocols available in eWAY Rapid API v3.
+Those are defined by the specification:
+ * RestClient - REST(JSON)
+ * SOAP
+ * HTTP POST (JSON or XML)
+ * RPC (XML or JSON)
+
+The idea of a Client class is to work with Request and Response objects on the interface level,
+however encode/decode them internally into necessary specific data (json, xml or anything else).
+'''
+
+from logging import getLogger
+
 import requests
+# from requests.exceptions import ConnectionError
 
-from logging import Logger, getLogger
-from requests.exceptions import ConnectionError
-
-from .endpoint import Endpoint
 from .exception import ResponseError
-
 
 class Client(object):
     '''
-    Client for eWAY Rapid API v3
+    Abstract client implementation.
+    Contains credentials, logger and an endpoint instance.
     '''
 
     _api_key = ''
@@ -61,13 +72,18 @@ class Client(object):
         #     raise InvalidEndpointError()
 
     def transparent_redirect_create_access_code(self, request):
+        '''Must be implemented in children'''
         raise TypeError('Method transparent_redirect_create_access_code has not been implemented')
 
     def transparent_redirect_get_transaction_info(self, access_code):
+        '''Must be implemented in children'''
         raise TypeError('Method transparent_redirect_get_transaction_info has not been implemented')
 
 
 class RestClient(Client):
+    '''
+    Implementation of a REST (JSON) client, which is recommended by the Rapid API v3 specification
+    '''
     def transparent_redirect_create_access_code(self, request):
         '''
         TransparentRedirect STEP 1
