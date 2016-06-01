@@ -1,5 +1,6 @@
 import inspect
 import json
+import six
 
 from enum import Enum
 
@@ -52,16 +53,15 @@ class StructToJsonMixin(object):
         return _dict if 'noharm' in kwargs else json.dumps(_dict)
 
 
-class StructFromJsonMixin(object):
+class StructFromJsonMixin(StructInitMixin):
     @classmethod
     def from_json(cls, json_string, ignore_unknown=False, **kwargs):
-        try:
-            if type(json_string) is str or type(json_string) is unicode:
-                _dict = json.loads(json_string)
-            else:
-                _dict = json_string
-        except:
+        if isinstance(json_string, six.string_types):
+            _dict = json.loads(json_string)
+        elif isinstance(json_string, dict):
             _dict = json_string
+        else:
+            raise TypeError('The source must be either string or dictionary')
 
         for key in _dict:
             if key in kwargs:
@@ -87,15 +87,15 @@ class StructFromJsonMixin(object):
                 _dict[key] = kwargs[key]
 
         instance = cls()
-        StructInitMixin.__init__(instance, ignore_unknown, **_dict)
+        super(StructFromJsonMixin, instance).__init__(ignore_unknown, **_dict)
         return instance
 
 
-class StructMixin(StructInitMixin, StructFromJsonMixin, StructToJsonMixin):
+class StructMixin(StructFromJsonMixin, StructToJsonMixin):
     pass
 
 
-class RequestMethod(StructToJsonMixin, StructFromJsonMixin, Enum):
+class RequestMethod(StructMixin, Enum):
     ProcessPayment = 'ProcessPayment'
     Authorise = 'Authorise'
     TokenPayment = 'TokenPayment'
@@ -106,7 +106,7 @@ class RequestMethod(StructToJsonMixin, StructFromJsonMixin, Enum):
         return u'"{}"'.format(self)
 
     @classmethod
-    def from_json(self, cls, json_string, *args, **kwargs):
+    def from_json(cls, json_string, *args, **kwargs):
         error = ValueError(u'Cannot read a correct representation of RequestMethod from json value: {}'.format(json_string))
 
         if not json_string.startswith(u'"') and not json_string.startswith(u"'"):
@@ -136,7 +136,7 @@ class RequestMethod(StructToJsonMixin, StructFromJsonMixin, Enum):
             raise error
 
 
-class TransactionType(StructToJsonMixin, StructFromJsonMixin, Enum):
+class TransactionType(StructMixin, Enum):
     Purchase = 'Purchase'
     MOTO = 'MOTO'
     Recurring = 'Recurring'
@@ -145,7 +145,7 @@ class TransactionType(StructToJsonMixin, StructFromJsonMixin, Enum):
         return u'"{}"'.format(self)
 
     @classmethod
-    def from_json(self, cls, json_string, *args, **kwargs):
+    def from_json(cls, json_string, *args, **kwargs):
         error = ValueError(u'Cannot read a correct representation of TransactionType from json value: {}'.format(json_string))
 
         if not json_string.startswith(u'"') and not json_string.startswith(u"'"):
