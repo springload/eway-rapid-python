@@ -49,3 +49,26 @@ class ProductionEndpoint(Endpoint):
     '''
 
     _url = r'https://api.ewaypayments.com/'
+
+
+
+class GenericEndpoint(Endpoint):
+    '''
+    eWAY Rapid API endpoind with configurable parameters
+
+    Usage:
+        endpoint = GenericEndpoint().set_url('http://localhost:8080/eway-mock').set_is_sandbox(False)
+    '''
+    _is_sandbox = True
+    _url = SandboxEndpoint._url
+
+    def set_url(self, url):
+        self._url = url
+        return self
+
+    def set_is_sandbox(self, flag):
+        self._is_sandbox = flag
+        return self
+
+    def is_sandbox(self):
+        return self._is_sandbox
