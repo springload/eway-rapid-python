@@ -121,7 +121,7 @@ class RestClient(Client):
     def _validate_response(self, response):
         txt = response.text.strip()
 
-        if response.status_code == 401:
+        if response.status_code in [401, 403]:
             raise ResponseError('S9993')  # Authentication error
 
         elif response.status_code == 404:
