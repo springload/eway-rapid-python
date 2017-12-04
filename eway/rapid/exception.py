@@ -17,6 +17,7 @@ class EwayError(Exception):
     '''
 
     INDEX = {}
+    REVERSE_INDEX = None
 
     _code = None
     _message = None
@@ -101,6 +102,44 @@ class EwayError(Exception):
         system_error = SysError.from_code(code)
         if system_error:
             return system_error
+
+        undocumented_error = UndocumentedError.from_code(code)
+        if undocumented_error:
+            return undocumented_error
+
+    @classmethod
+    def from_message(cls, message, *args, **kwargs):
+        '''
+        Create an error object from message
+        '''
+
+        if cls.REVERSE_INDEX is None:
+            cls.REVERSE_INDEX = {msg:code for code, msg in cls.INDEX.items()}
+
+        code = cls.REVERSE_INDEX.get(message, None)
+        if code:
+            return cls(code, *args, **kwargs)
+
+        return None
+
+    @staticmethod
+    def lookup_error_by_message(message, *args, **kwargs):
+        '''
+        Looks for a particular exception code by message
+
+        Arguments:
+            message  : str      = error message
+            *args    : [?]      = additional arguments to be passed in an exception constructor
+            **kwargs : {str: ?} = additional arguments to be passed in an exception constructor
+        '''
+
+        # Unlike within `lookup_error_by_code`, `UndocumentedError` comes first
+        # as in the context of searching by message, it is the most likely candidate.
+        error_classes = (UndocumentedError, ResponseError, ValidationError, TransactionError, FraudError, SysError)
+        for error_class in error_classes:
+            err = error_class.from_message(message, *args, **kwargs)
+            if err:
+                return err
 
 
 class ResponseError(EwayError):
@@ -413,3 +452,22 @@ class TransactionError(EwayError):
             raise ValueError('Invalid error code: {}'.format(code))
 
         super(TransactionError, self).__init__(code, TransactionError.INDEX[code], *args, **kwargs)
+
+
+class UndocumentedError(EwayError):
+    '''
+    Represents errors not defined in the specification
+
+    Note: Error codes are prefixed with `UE` (2 letters instead of 1)
+    in order to reduce likelyhood of name clashing if eWAY was to introduce new error codes.
+    '''
+
+    INDEX = {
+        "UE001": "Access Code Not Found",
+    }
+
+    def __init__(self, code, *args, **kwargs):
+        if code not in UndocumentedError.INDEX.keys():
+            raise ValueError('Invalid error code: {}'.format(code))
+
+        super(UndocumentedError, self).__init__(code, UndocumentedError.INDEX[code], *args, **kwargs)
