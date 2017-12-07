@@ -18,7 +18,7 @@ if version_info.major < 3 or (version_info.major == 3 and version_info.minor < 4
 setup(
     name = 'eway-rapid-python',
     description = 'Python client implementation for eWAY Rapid API v3',
-    version = '0.7.1',
+    version = '0.8',
     packages = find_packages(exclude=('tests',)),
     install_requires = requirements,
     extras_require = {'testing': ['hypothesis>=3.1.3', 'coverage']},
