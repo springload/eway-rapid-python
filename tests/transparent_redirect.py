@@ -15,9 +15,11 @@ except:
 
 
 from eway.rapid.client import RestClient
+from eway.rapid.exception import EwayError
 from eway.rapid.model import Customer, Item, Option, Payment, RequestMethod, ShippingAddress, TransactionType
 from eway.rapid.endpoint import SandboxEndpoint
 from eway.rapid.payment_method.transparent_redirect import TransparentRedirect, CreateAccessCodeRequest, AccessCodeResponse
+from eway.rapid.payment_method.transparent_redirect.response import TransactionInfo
 
 
 
@@ -199,3 +201,38 @@ class TestTransparentRedirect(unittest.TestCase):
         self.assertEqual(info.Options[2].Value, 'Option3')
         self.assertEqual(info.Options[3].Value, 'Option4')
         self.assertEqual(info.Options[4].Value, 'Option5')
+
+
+class TestTransactionInfo(unittest.TestCase):
+    def test_undocumented_message_key_does_not_raise(self):
+        data = '{"Message":"Access Code Not Found"}'
+        try:
+            TransactionInfo.from_json(data, ignore_unknown=False)
+        except AttributeError:
+            self.fail('TransactionInfo should not raise `AttributeError` for `Message` key in data')
+
+    def test_undocumented_message_key_is_not_available(self):
+        data = '{"Message":"Access Code Not Found"}'
+        struct = TransactionInfo.from_json(data, ignore_unknown=False)
+
+        with self.assertRaises(AttributeError):
+            struct.Message
+
+    def test_undocumented_message_map_success(self):
+        message = 'Access Code Not Found'
+        data = '{"Message":"%s"}' % message
+        struct = TransactionInfo.from_json(data, ignore_unknown=False)
+        code = EwayError.lookup_error_by_message(message)._code
+
+        self.assertIsNotNone(struct.ResponseMessage, msg='Message should map to ResponseMessage')
+        self.assertEqual(struct.ResponseMessage, code, msg='Message should map to ResponseMessage')
+
+    def test_undocumented_message_map_ignored(self):
+        message = 'Access Code Not Found'
+        response_message = 'FooBar'
+        data = '{"Message":"%s","ResponseMessage":"%s"}' % (message, response_message)
+        struct = TransactionInfo.from_json(data, ignore_unknown=False)
+        code = EwayError.lookup_error_by_message(message)._code
+
+        self.assertEqual(struct.ResponseMessage, response_message, msg='Message should not overwrite ResponseMessage')
+        self.assertNotEqual(struct.ResponseMessage, code, msg='Message should not overwrite ResponseMessage')

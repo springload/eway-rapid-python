@@ -3,6 +3,10 @@ The module contains classes representing responses of the Rapid API during creat
 using TransparentRedirect payment method
 '''
 
+import json
+import six
+
+from eway.rapid.exception import EwayError
 from eway.rapid.model import Customer, Option, Payment, StructMixin, Verification, BeagleVerification
 
 
@@ -79,4 +83,29 @@ class TransactionInfo(StructMixin):
     def from_json(cls, json_string, ignore_unknown=False, **kwargs):
         _kwargs = {'Options': [Option], 'Verification': Verification, 'BeagleVerification': BeagleVerification}
         _kwargs.update(kwargs)
-        return super(TransactionInfo, cls).from_json(json_string, ignore_unknown, **_kwargs)
+
+        if isinstance(json_string, six.string_types):
+            _dict = json.loads(json_string)
+        elif isinstance(json_string, dict):
+            _dict = json_string
+        else:
+            raise TypeError('The source must be either string or dictionary')
+
+        cls._map_undocumented_message(_dict)
+
+        return super(TransactionInfo, cls).from_json(_dict, ignore_unknown, **_kwargs)
+
+    @classmethod
+    def _map_undocumented_message(cls, _dict):
+        if 'Message' not in _dict:
+            return
+
+        # Pop the key so it doesn't crash during init.
+        msg = _dict.pop('Message')
+
+        # Do not overwrite the official `ResponseMessage` with the unofficial `Message`.
+        if 'ResponseMessage' in _dict:
+            return
+
+        err = EwayError.lookup_error_by_message(msg)
+        _dict['ResponseMessage'] = err._code if err else msg
