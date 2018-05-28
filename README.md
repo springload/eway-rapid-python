@@ -58,7 +58,7 @@ transaction = payment_method.request_transaction_result(response.AccessCode)
 print(transaction.to_json())
 ```
 
-For more complete example have a look at [Transparent Redirect tests](./tests/transparent_redirect.py)
+For more complete example have a look at [Transparent Redirect tests](./tests/transparent_redirect.py) and the [Snippets](https://github.com/springload/eway-rapid-python/wiki#snippets) section of the wiki.
 
 # Testing
 
